@@ -7,12 +7,15 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { ForgetPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Authentication') 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('signup')
+  @ApiBody({ type: SignupDto })
   async signup(@Body() signupData: SignupDto) {
     return this.authService.signup(signupData)
   }
@@ -26,6 +29,7 @@ export class AuthController {
     return this.authService.login(credentials)
   }
 
+  @UseGuards(AuthGuard)
   @Post('refresh')
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(refreshTokenDto.refreshToken, refreshTokenDto.userId)
