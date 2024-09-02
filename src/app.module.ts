@@ -5,8 +5,6 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './config/config';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { EmailModule } from './email/email.module';
 
 @Module({
