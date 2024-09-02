@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards, Req, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  UseGuards,
+  Req,
+  Query,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -9,39 +18,45 @@ import { ForgetPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Authentication') 
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
   @ApiBody({ type: SignupDto })
   async signup(@Body() signupData: SignupDto) {
-    return this.authService.signup(signupData)
+    return this.authService.signup(signupData);
   }
   @Get('verify-email')
   async verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token)
+    return this.authService.verifyEmail(token);
   }
 
   @Post('login')
   async login(@Body() credentials: LoginDto) {
-    return this.authService.login(credentials)
+    return this.authService.login(credentials);
   }
 
   @UseGuards(AuthGuard)
   @Post('refresh')
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshTokens(refreshTokenDto.refreshToken, refreshTokenDto.userId)
+    return this.authService.refreshTokens(
+      refreshTokenDto.refreshToken,
+      refreshTokenDto.userId,
+    );
   }
 
   @UseGuards(AuthGuard)
   @Put('change-password')
-  async changePassword(@Body() changePassWordDto: ChangePasswordDto, @Req() req) {
+  async changePassword(
+    @Body() changePassWordDto: ChangePasswordDto,
+    @Req() req,
+  ) {
     return this.authService.changePassword(
       req.userId,
       changePassWordDto.oldPassword,
-      changePassWordDto.newPassword
+      changePassWordDto.newPassword,
     );
   }
 
@@ -51,13 +66,10 @@ export class AuthController {
   }
 
   @Put('reset-password')
-  async resetPassword(
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ) {
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.authService.resetPassword(
       resetPasswordDto.newPassword,
-      resetPasswordDto.resetToken
-    )
+      resetPasswordDto.resetToken,
+    );
   }
-
 }
