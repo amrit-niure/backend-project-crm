@@ -10,7 +10,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
   ],
-  //fdfd
   root: true,
   env: {
     node: true,
