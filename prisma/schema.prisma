@@ -20,7 +20,7 @@ model User {
   password          String
   role              Role                @default(USER)
   isEmailVerified   Boolean             @default(false)
-  RefreshToken      RefreshToken?
+  hashedRt          RefreshToken?
   ResetToken        ResetToken[]
   verificationToken VerificationToken[] // Relation to VerificationToken model
 }

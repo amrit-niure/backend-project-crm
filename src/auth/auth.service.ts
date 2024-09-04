@@ -14,6 +14,7 @@ import { nanoid } from 'nanoid';
 import { EmailService } from 'src/email/email.service';
 import { JwtPayload } from './types';
 import { Currentuser } from './types/current-user.types';
+import * as argon from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -172,7 +173,7 @@ export class AuthService {
       );
     }
 
-    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+    const newHashedPassword = await argon.hash(newPassword);
 
     await this.prismaService.user.update({
       where: {
@@ -233,7 +234,7 @@ export class AuthService {
 
     if (!user) throw new NotFoundException('User not found!');
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await argon.hash(newPassword);
 
     await this.prismaService.user.update({
       where: {
@@ -325,19 +326,46 @@ export class AuthService {
   async storeRefreshToken(refreshToken: string, userId: string) {
     // Calculate the expiry date based on the '7d' duration
     const expiryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
-
+    const hashedRt = await argon.hash(refreshToken);
     // Use the upsert method to create the refreshtoken if it is not already created.
     await this.prismaService.refreshToken.upsert({
       where: { userId }, // Unique identifier for the token record
       update: {
-        refreshToken,
+        refreshToken: hashedRt,
         expiryDate,
       },
       create: {
-        refreshToken,
+        refreshToken: hashedRt,
         expiryDate,
         userId,
       },
     });
+  }
+
+  async validateRefreshToken(userId: string, refreshToken: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        hashedRt: true,
+      },
+    });
+
+    if (!user || !user.hashedRt) {
+      throw new UnauthorizedException('Invalid Refresh Token');
+    }
+
+    const refreshTokenMatches = await argon.verify(
+      user.hashedRt.refreshToken,
+      refreshToken,
+    );
+
+    if (!refreshTokenMatches)
+      throw new UnauthorizedException('Inavlid Refresh Token');
+
+    return { userId: userId };
   }
 }

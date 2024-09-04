@@ -3,14 +3,18 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { JwtPayload, JwtPayloadWithRt } from '../types';
+import { JwtPayload } from '../types';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(
   Strategy,
   'refresh-jwt',
 ) {
-  constructor(configService: ConfigService) {
+  constructor(
+    configService: ConfigService,
+    private authService: AuthService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: configService.get<string>('rt_secret'),
@@ -18,7 +22,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     });
   }
 
-  validate(req: Request, payload: JwtPayload): JwtPayloadWithRt {
+  validate(req: Request, payload: JwtPayload) {
     // point of doubt.
     const refreshToken = req
       ?.get('authorization')
@@ -27,9 +31,12 @@ export class RefreshJwtStrategy extends PassportStrategy(
 
     if (!refreshToken) throw new ForbiddenException('Refresh token malformed');
 
-    return {
-      ...payload,
-      refreshToken,
-    };
+    const userId = payload.sub;
+
+    return this.authService.validateRefreshToken(userId, refreshToken);
+    // return {
+    //   ...payload,
+    //   refreshToken,
+    // };
   }
 }
