@@ -1,18 +1,18 @@
-import { Controller, Get, Req, Request, SetMetadata, UseGuards } from '@nestjs/common';
-import { AppService } from './app.service';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtGuard } from './guards/jwt.guard';
 import { Role } from '@prisma/client';
 import { Roles } from './decorators/roles.decorator';
-
+import { RolesGuard } from './guards/roles.guard';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) { }
+  constructor() {}
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.USER)
+  @UseGuards(RolesGuard)
+  @UseGuards(JwtGuard)
   @Get()
   getHello() {
-    return { status: 'running' }
+    return { status: 'running' };
   }
-
 }
