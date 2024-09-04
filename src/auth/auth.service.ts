@@ -182,6 +182,8 @@ export class AuthService {
         password: newHashedPassword,
       },
     });
+
+    return { success: 'Password Updated Succesfully.' };
   }
 
   async forgetPassword(email: string) {
@@ -273,7 +275,6 @@ export class AuthService {
         id: token.id,
       },
     });
-    // Generate new user tokens (TODO: pass other feilds like name email role in tokens form here. )
     return this.generateuserTokens(token.userId);
   }
 

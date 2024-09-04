@@ -20,11 +20,12 @@ import { ForgetPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from 'src/guards/local-auth.guard';
-import { LoginDto } from './dto/login.dto';
+import { RefreshAuthGuard } from 'src/guards/refresh-auth.guard';
+
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
   @ApiBody({ type: SignupDto })
@@ -40,11 +41,10 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Request() req) {
-    return await this.authService.login(req.user.userId)
+    return await this.authService.login(req.user.userId);
   }
 
-
-  @UseGuards(JwtGuard)
+  @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(
@@ -59,8 +59,9 @@ export class AuthController {
     @Body() changePassWordDto: ChangePasswordDto,
     @Req() req,
   ) {
+    console.log(req);
     return this.authService.changePassword(
-      req.userId,
+      req.user.sub,
       changePassWordDto.oldPassword,
       changePassWordDto.newPassword,
     );

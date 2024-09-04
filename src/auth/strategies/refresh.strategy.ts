@@ -19,6 +19,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
   }
 
   validate(req: Request, payload: JwtPayload): JwtPayloadWithRt {
+    // point of doubt.
     const refreshToken = req
       ?.get('authorization')
       ?.replace('Bearer', '')
