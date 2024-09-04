@@ -7,21 +7,24 @@ import {
   UseGuards,
   Req,
   Query,
+  Request,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
-import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refreshTokens.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
+import { JwtGuard } from 'src/guards/jwt.guard';
 import { ForgetPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-
+import { LocalAuthGuard } from 'src/guards/local-auth.guard';
+import { LoginDto } from './dto/login.dto';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('signup')
   @ApiBody({ type: SignupDto })
@@ -33,12 +36,15 @@ export class AuthController {
     return this.authService.verifyEmail(token);
   }
 
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() credentials: LoginDto) {
-    return this.authService.login(credentials);
+  async login(@Request() req) {
+    return await this.authService.login(req.user.userId)
   }
 
-  @UseGuards(AuthGuard)
+
+  @UseGuards(JwtGuard)
   @Post('refresh')
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(
@@ -47,7 +53,7 @@ export class AuthController {
     );
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtGuard)
   @Put('change-password')
   async changePassword(
     @Body() changePassWordDto: ChangePasswordDto,

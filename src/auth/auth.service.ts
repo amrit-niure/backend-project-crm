@@ -7,6 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
 import { EmailService } from 'src/email/email.service';
+import { AuthJwtPayload } from 'src/types/auth-jwtPayload';
+import { ValidationError } from 'class-validator';
 
 @Injectable()
 export class AuthService {
@@ -57,7 +59,7 @@ export class AuthService {
         name: true,
       },
     });
-    await this.mailerService.sendVerificationEmail(name,email, verificationToken)
+    await this.mailerService.sendVerificationEmail(name, email, verificationToken)
     return { message: "Sign up successful! Please check your email to verify your account." };
   }
 
@@ -68,7 +70,7 @@ export class AuthService {
         expiryDate: { gt: new Date() },  // Check if the expiry date is in the future
       },
     });
-  
+
 
     if (!verificationToken) throw new BadRequestException('Verification link is invalid or has expired.');
 
@@ -87,14 +89,24 @@ export class AuthService {
       }
     });
 
-    return {Name: user.name, Email : user.email , message: 'Email has been verified succesfully. You can now Log in.'};
+    return { Name: user.name, Email: user.email, message: 'Email has been verified succesfully. You can now Log in.' };
 
   }
 
 
-  async login(credentials: LoginDto) {
+  async login(userId: string) {
+    //validation of this user is done by the local.strategy > validate > validateUser
+    const tokens = await this.generateuserTokens(userId)
+    return {
+      ...tokens,
+      userId: userId,
+    };
+  }
 
-    const { password, email } = credentials;
+
+  //passport js 
+  async validateUser(email: string, password: string) {
+
     const user = await this.prismaService.user.findUnique({
       where: {
         email: email,
@@ -114,10 +126,7 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong Credentials');
     }
-
-    const tokens = await this.generateuserTokens(user.id)
     return {
-      ...tokens,
       userId: user.id,
     };
   }
@@ -253,13 +262,15 @@ export class AuthService {
   }
 
 
-  async generateuserTokens(userId) {
-
+  async generateuserTokens(userId: string) {
+    const payload: AuthJwtPayload = {
+      sub: userId
+    }
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync({ userId }, { // it uses the global secret for jwt form config folder and rt secret for refresh token
+      this.jwtService.signAsync({ payload }, { // it uses the global secret for jwt form config folder and rt secret for refresh token
         expiresIn: '1h',
       }),
-      this.jwtService.signAsync({ userId }, {
+      this.jwtService.signAsync({ payload }, {
         secret: this.configService.get<string>('rt.secret'),
         expiresIn: '7d',
       }),
