@@ -18,6 +18,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: configService.get<string>('rt_secret'),
+      ignoreExpiration: false,
       passReqToCallback: true,
     });
   }
@@ -34,9 +35,5 @@ export class RefreshJwtStrategy extends PassportStrategy(
     const userId = payload.sub;
 
     return this.authService.validateRefreshToken(userId, refreshToken);
-    // return {
-    //   ...payload,
-    //   refreshToken,
-    // };
   }
 }
