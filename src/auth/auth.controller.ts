@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
-import { RefreshTokenDto } from './dto/refreshTokens.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtGuard } from 'src/guards/jwt.guard';
 import { ForgetPasswordDto } from './dto/forgot-password.dto';
@@ -46,11 +45,9 @@ export class AuthController {
 
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
-  async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshTokens(
-      refreshTokenDto.refreshToken,
-      refreshTokenDto.userId,
-    );
+  async refreshTokens(@Req() req) {
+    const { userId, hashedRt } = req.user;
+    return this.authService.refreshTokens(hashedRt, userId);
   }
 
   @UseGuards(JwtGuard)
@@ -59,7 +56,6 @@ export class AuthController {
     @Body() changePassWordDto: ChangePasswordDto,
     @Req() req,
   ) {
-    console.log(req);
     return this.authService.changePassword(
       req.user.sub,
       changePassWordDto.oldPassword,

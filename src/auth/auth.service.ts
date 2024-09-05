@@ -7,12 +7,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { SignupDto } from './dto/signup.dto';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
 import { EmailService } from 'src/email/email.service';
-import { JwtPayload } from './types';
+import { JwtPayload, Tokens } from './types';
 import { Currentuser } from './types/current-user.types';
 import * as argon from 'argon2';
 
@@ -40,7 +39,7 @@ export class AuthService {
     }
 
     // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await argon.hash(password);
 
     const verificationToken = nanoid(64);
     const expiryDate = new Date();
@@ -140,7 +139,7 @@ export class AuthService {
       );
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await argon.verify(user.password, password);
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong Credentials');
     }
@@ -161,13 +160,14 @@ export class AuthService {
     });
 
     if (!user) throw new NotFoundException('User not found!');
-
-    const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+    console.log('here');
+    const passwordMatch = await argon.verify(user.password, oldPassword);
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong Credentials');
     }
+    console.log('here2');
 
-    if (await bcrypt.compare(newPassword, user.password)) {
+    if (await argon.verify(user.password, newPassword)) {
       throw new ConflictException(
         'New password should not be the same as the old password',
       );
@@ -254,11 +254,12 @@ export class AuthService {
     return { message: 'Password has been reset successfully.' };
   }
 
-  async refreshTokens(refreshToken: string, userId: string) {
+  async refreshTokens(hahsedRt: string, userId: string) {
+    console.log(hahsedRt, userId);
     const token = await this.prismaService.refreshToken.findFirst({
       where: {
         AND: [
-          { refreshToken: refreshToken },
+          { refreshToken: hahsedRt },
           { userId: userId },
           { expiryDate: { gt: new Date() } },
         ],
@@ -273,10 +274,15 @@ export class AuthService {
 
     await this.prismaService.refreshToken.delete({
       where: {
-        id: token.id,
+        userId: userId,
+        refreshToken: hahsedRt,
       },
     });
-    return this.generateuserTokens(token.userId);
+    const tokens: Tokens = await this.generateuserTokens(userId);
+    return {
+      ...tokens,
+      userId,
+    };
   }
 
   async validateJwtUser(userId: string) {
@@ -366,6 +372,6 @@ export class AuthService {
     if (!refreshTokenMatches)
       throw new UnauthorizedException('Inavlid Refresh Token');
 
-    return { userId: userId };
+    return { userId, hashedRt: user.hashedRt.refreshToken };
   }
 }
