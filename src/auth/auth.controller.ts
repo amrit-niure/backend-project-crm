@@ -20,12 +20,14 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from 'src/guards/local-auth.guard';
 import { RefreshAuthGuard } from 'src/guards/refresh-auth.guard';
+import { Public } from 'src/decorators/public.decorator';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('signup')
   @ApiBody({ type: SignupDto })
   async signup(@Body() signupData: SignupDto) {
