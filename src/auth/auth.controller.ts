@@ -69,10 +69,16 @@ export class AuthController {
   }
 
   @Put('reset-password')
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
-    return this.authService.resetPassword(
-      resetPasswordDto.newPassword,
-      resetPasswordDto.resetToken,
-    );
+  async resetPassword(
+    @Query('token') token: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    return this.authService.resetPassword(resetPasswordDto.newPassword, token);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('logout')
+  async logOut(@Req() req) {
+    return this.authService.logOut(req.user.sub);
   }
 }

@@ -160,12 +160,11 @@ export class AuthService {
     });
 
     if (!user) throw new NotFoundException('User not found!');
-    console.log('here');
+
     const passwordMatch = await argon.verify(user.password, oldPassword);
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong Credentials');
     }
-    console.log('here2');
 
     if (await argon.verify(user.password, newPassword)) {
       throw new ConflictException(
@@ -373,5 +372,14 @@ export class AuthService {
       throw new UnauthorizedException('Inavlid Refresh Token');
 
     return { userId, hashedRt: user.hashedRt.refreshToken };
+  }
+
+  async logOut(userId: string) {
+    await this.prismaService.refreshToken.delete({
+      where: {
+        userId: userId,
+      },
+    });
+    return { message: 'signed out' };
   }
 }

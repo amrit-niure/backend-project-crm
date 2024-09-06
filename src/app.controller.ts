@@ -8,7 +8,7 @@ import { RolesGuard } from './guards/roles.guard';
 export class AppController {
   constructor() {}
 
-  @Roles(Role.USER)
+  @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)
   @UseGuards(JwtGuard)
   @Get()

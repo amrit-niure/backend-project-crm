@@ -3,13 +3,13 @@ import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) { }
+  constructor(private readonly mailerService: MailerService) {}
 
   async sendResetPasswordEmail(to: string, token: string): Promise<void> {
     try {
       const context = {
         name: 'Amrit Niure',
-        resetLink: `https://amritniure.com.np`, // Replace with frontend URL
+        resetLink: `https://amritniure.com.np?token=${token}`, // Replace with frontend URL
       };
       await this.mailerService.sendMail({
         to: to,
@@ -24,8 +24,6 @@ export class EmailService {
     }
   }
 
-
-
   async sendVerificationEmail(name: string, email: string, token: string) {
     const verificationUrl = `http://your-app.com/verify-email?token=${token}`; // Replace with frontend URL
 
@@ -39,7 +37,4 @@ export class EmailService {
       },
     });
   }
-
 }
-
-
