@@ -11,6 +11,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtGuard } from 'src/guards/jwt.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { RolesGuard } from 'src/guards/roles.guard';
   ],
   controllers: [AuthController],
   providers: [
+    UserService,
     AuthService,
     PrismaService,
     ConfigService,
