@@ -313,7 +313,6 @@ export class AuthService {
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        // it uses the global secret for jwt form config folder and rt secret for refresh token
         expiresIn: '1h',
       }),
       this.jwtService.signAsync(payload, {
