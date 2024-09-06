@@ -373,4 +373,13 @@ export class AuthService {
 
     return { userId, hashedRt: user.hashedRt.refreshToken };
   }
+
+  async logOut(userId: string) {
+    await this.prismaService.refreshToken.delete({
+      where: {
+        userId: userId,
+      },
+    });
+    return { message: 'signed out' };
+  }
 }

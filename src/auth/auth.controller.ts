@@ -75,4 +75,10 @@ export class AuthController {
   ) {
     return this.authService.resetPassword(resetPasswordDto.newPassword, token);
   }
+
+  @UseGuards(JwtGuard)
+  @Post('logout')
+  async logOut(@Req() req) {
+    return this.authService.logOut(req.user.sub);
+  }
 }
