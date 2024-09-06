@@ -14,6 +14,7 @@ import { EmailService } from 'src/email/email.service';
 import { JwtPayload, Tokens } from './types';
 import { Currentuser } from './types/current-user.types';
 import * as argon from 'argon2';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -111,13 +112,13 @@ export class AuthService {
     };
   }
 
-  async login(user) {
+  async login(user: User) {
     console.log(user);
     //validation of this user is done by the local.strategy > validate > validateUser
     const tokens = await this.generateuserTokens(user.id);
     return {
       ...tokens,
-      user,
+      ...user,
     };
   }
 
@@ -144,10 +145,7 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong Credentials');
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: userPassword, ...rest } = user;
-
-    return rest;
+    return user;
   }
 
   async changePassword(
@@ -310,7 +308,6 @@ export class AuthService {
   }
 
   async generateuserTokens(userId: string) {
-    console.log(userId);
     const payload: JwtPayload = {
       sub: userId,
     };
