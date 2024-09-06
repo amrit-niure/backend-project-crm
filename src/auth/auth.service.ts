@@ -111,12 +111,13 @@ export class AuthService {
     };
   }
 
-  async login(userId: string) {
+  async login(user) {
+    console.log(user);
     //validation of this user is done by the local.strategy > validate > validateUser
-    const tokens = await this.generateuserTokens(userId);
+    const tokens = await this.generateuserTokens(user.id);
     return {
       ...tokens,
-      userId: userId,
+      user,
     };
   }
 
@@ -143,9 +144,10 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong Credentials');
     }
-    return {
-      userId: user.id,
-    };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: userPassword, ...rest } = user;
+
+    return rest;
   }
 
   async changePassword(
@@ -308,6 +310,7 @@ export class AuthService {
   }
 
   async generateuserTokens(userId: string) {
+    console.log(userId);
     const payload: JwtPayload = {
       sub: userId,
     };
