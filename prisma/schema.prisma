@@ -22,14 +22,14 @@ model User {
   isEmailVerified   Boolean             @default(false)
   hashedRt          RefreshToken?
   ResetToken        ResetToken[]
-  verificationToken VerificationToken[] // Relation to VerificationToken model
+  verificationToken VerificationToken[]
 }
 
 model RefreshToken {
   id           String   @id @default(uuid())
   refreshToken String   @unique
   expiryDate   DateTime
-  user         User     @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String   @unique
 }
 
@@ -37,7 +37,7 @@ model ResetToken {
   id         String   @id @default(uuid())
   token      String   @unique
   expiryDate DateTime
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
 }
 
@@ -45,7 +45,7 @@ model VerificationToken {
   id         String   @id @default(uuid())
   token      String   @unique
   expiryDate DateTime
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String
 }
 

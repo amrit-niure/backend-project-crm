@@ -33,11 +33,13 @@ export class AuthController {
   async signup(@Body() signupData: SignupDto) {
     return this.authService.signup(signupData);
   }
+
   @Get('verify-email')
   async verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
   }
 
+  @Public()
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -52,7 +54,6 @@ export class AuthController {
     return this.authService.refreshTokens(hashedRt, userId);
   }
 
-  @UseGuards(JwtGuard)
   @Put('change-password')
   async changePassword(
     @Body() changePassWordDto: ChangePasswordDto,
