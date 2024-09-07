@@ -24,14 +24,12 @@ export class RefreshJwtStrategy extends PassportStrategy(
   }
 
   validate(req: Request, payload: JwtPayload) {
-    // point of doubt.
     const refreshToken = req
       ?.get('authorization')
       ?.replace('Bearer', '')
       .trim();
 
     if (!refreshToken) throw new ForbiddenException('Refresh token malformed');
-
     const userId = payload.sub;
 
     return this.authService.validateRefreshToken(userId, refreshToken);

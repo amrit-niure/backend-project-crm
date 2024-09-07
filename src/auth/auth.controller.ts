@@ -48,6 +48,7 @@ export class AuthController {
     return await this.authService.login(req.user);
   }
 
+  @Public()
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   async refreshTokens(@Req() req) {

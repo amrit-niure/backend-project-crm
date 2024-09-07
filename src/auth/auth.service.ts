@@ -145,7 +145,7 @@ export class AuthService {
       throw new UnauthorizedException('Wrong Credentials');
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: pwd, ...rest } = user;
+    const { password: pwd, isEmailVerified, ...rest } = user;
 
     return rest;
   }
@@ -256,7 +256,6 @@ export class AuthService {
   }
 
   async refreshTokens(hahsedRt: string, userId: string) {
-    console.log(hahsedRt, userId);
     const token = await this.prismaService.refreshToken.findFirst({
       where: {
         AND: [
