@@ -113,12 +113,11 @@ export class AuthService {
   }
 
   async login(user: User) {
-    console.log(user);
     //validation of this user is done by the local.strategy > validate > validateUser
     const tokens = await this.generateuserTokens(user.id);
     return {
-      ...tokens,
-      ...user,
+      tokens,
+      user,
     };
   }
 
@@ -131,7 +130,7 @@ export class AuthService {
     });
 
     if (!user) {
-      // dont tell user that user with this email is not found, rather give more generic response.
+      // Give a generic response to avoid revealing if the email exists or not
       throw new UnauthorizedException('Wrong Credentials');
     }
 
@@ -145,7 +144,10 @@ export class AuthService {
     if (!passwordMatch) {
       throw new UnauthorizedException('Wrong Credentials');
     }
-    return user;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: pwd, ...rest } = user;
+
+    return rest;
   }
 
   async changePassword(

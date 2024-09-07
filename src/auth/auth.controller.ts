@@ -34,6 +34,7 @@ export class AuthController {
     return this.authService.signup(signupData);
   }
 
+  @Public()
   @Get('verify-email')
   async verifyEmail(@Query('token') token: string) {
     return this.authService.verifyEmail(token);
