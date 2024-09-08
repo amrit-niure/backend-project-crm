@@ -24,12 +24,17 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true
-  }))
-
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  app.enableCors({
+    origin: ['http://localhost:3001'],
+    credentials: true, // Allow credentials like cookies to be sent
+  });
   // app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(PORT, () => {
     console.log(`Running API in MODE:${NODE_ENV} on Port: ${PORT}`);

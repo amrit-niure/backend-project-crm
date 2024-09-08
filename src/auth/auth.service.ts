@@ -15,6 +15,7 @@ import { JwtPayload, Tokens } from './types';
 import { Currentuser } from './types/current-user.types';
 import * as argon from 'argon2';
 import { User } from '@prisma/client';
+import { generateVerificationCode } from 'src/lib/utils/generateVerificationCode';
 
 @Injectable()
 export class AuthService {
@@ -42,9 +43,9 @@ export class AuthService {
     // Hash the password
     const hashedPassword = await argon.hash(password);
 
-    const verificationToken = nanoid(64);
+    const verificationCode = generateVerificationCode();
     const expiryDate = new Date();
-    expiryDate.setHours(expiryDate.getHours() + 24);
+    expiryDate.setHours(expiryDate.getHours() + 1);
 
     // Create a new user record in the database
     await this.prismaService.user.create({
@@ -53,9 +54,9 @@ export class AuthService {
         email: email,
         password: hashedPassword,
         isEmailVerified: false,
-        verificationToken: {
+        verificationCode: {
           create: {
-            token: verificationToken,
+            code: verificationCode,
             expiryDate: expiryDate,
           },
         },
@@ -68,40 +69,39 @@ export class AuthService {
     await this.mailerService.sendVerificationEmail(
       name,
       email,
-      verificationToken,
+      verificationCode,
     );
     return {
       message:
-        'Sign up successful! Please check your email to verify your account.',
+        'Sign up successful! Please use the verification code on sent on your email to verify your account.',
     };
   }
 
-  async verifyEmail(tokentoVerify: string) {
-    const verificationToken =
-      await this.prismaService.verificationToken.findFirst({
-        where: {
-          token: tokentoVerify, // Directly match the token
-          expiryDate: { gt: new Date() }, // Check if the expiry date is in the future
-        },
-      });
+  async verifyEmail(verificationCode: number) {
+    const verification = await this.prismaService.verificationCode.findFirst({
+      where: {
+        code: verificationCode,
+        expiryDate: { gt: new Date() },
+      },
+    });
 
-    if (!verificationToken)
+    if (!verification)
       throw new BadRequestException(
-        'Verification link is invalid or has expired.',
+        'Verification code is invalid or has expired.',
       );
 
     const user = await this.prismaService.user.update({
       where: {
-        id: verificationToken.userId,
+        id: verification.userId,
       },
       data: {
         isEmailVerified: true,
       },
     });
 
-    await this.prismaService.verificationToken.delete({
+    await this.prismaService.verificationCode.delete({
       where: {
-        id: verificationToken.id,
+        id: verification.id,
       },
     });
 

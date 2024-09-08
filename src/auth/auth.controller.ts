@@ -21,6 +21,7 @@ import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from 'src/guards/local-auth.guard';
 import { RefreshAuthGuard } from 'src/guards/refresh-auth.guard';
 import { Public } from 'src/decorators/public.decorator';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -36,8 +37,8 @@ export class AuthController {
 
   @Public()
   @Get('verify-email')
-  async verifyEmail(@Query('token') token: string) {
-    return this.authService.verifyEmail(token);
+  async verifyEmail(@Body() verifyEmailData: VerifyEmailDto) {
+    return this.authService.verifyEmail(verifyEmailData.verificationCode);
   }
 
   @Public()

@@ -24,16 +24,14 @@ export class EmailService {
     }
   }
 
-  async sendVerificationEmail(name: string, email: string, token: string) {
-    const verificationUrl = `http://your-app.com/verify-email?token=${token}`; // Replace with frontend URL
-
+  async sendVerificationEmail(name: string, email: string, code: number) {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Verify Your Email',
       template: 'verify-email',
       context: {
         name,
-        verificationUrl,
+        code,
       },
     });
   }
