@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
   Put,
@@ -36,7 +35,7 @@ export class AuthController {
   }
 
   @Public()
-  @Get('verify-email')
+  @Post('verify-email')
   async verifyEmail(@Body() verifyEmailData: VerifyEmailDto) {
     return this.authService.verifyEmail(verifyEmailData.verificationCode);
   }
