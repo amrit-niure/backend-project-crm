@@ -17,6 +17,8 @@ import * as argon from 'argon2';
 import { User } from '@prisma/client';
 import { generateVerificationCode } from 'src/lib/utils/generateVerificationCode';
 
+const EXPIRY_TIME = 20 * 1000;
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -335,7 +337,7 @@ export class AuthService {
     };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
-        expiresIn: '1h',
+        expiresIn: '20s',
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('rt.secret'),
@@ -346,6 +348,7 @@ export class AuthService {
     return {
       access_token: accessToken,
       refresh_token: refreshToken,
+      expiresIn: new Date().setTime(new Date().getTime() + EXPIRY_TIME),
     };
   }
 
