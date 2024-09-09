@@ -13,7 +13,6 @@ import {
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { JwtGuard } from 'src/guards/jwt.guard';
 import { ForgetPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
@@ -67,21 +66,22 @@ export class AuthController {
       changePassWordDto.newPassword,
     );
   }
-
+  @Public()
   @Post('forgot-password')
   async forgetPassword(@Body() forgetPasswordDto: ForgetPasswordDto) {
     return this.authService.forgetPassword(forgetPasswordDto.email);
   }
 
+  @Public()
   @Put('reset-password')
   async resetPassword(
     @Query('token') token: string,
     @Body() resetPasswordDto: ResetPasswordDto,
   ) {
+    console.log(token, resetPasswordDto.newPassword);
     return this.authService.resetPassword(resetPasswordDto.newPassword, token);
   }
 
-  @UseGuards(JwtGuard)
   @Post('logout')
   async logOut(@Req() req) {
     return this.authService.logOut(req.user.sub);

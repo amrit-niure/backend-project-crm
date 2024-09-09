@@ -196,6 +196,26 @@ export class AuthService {
     });
 
     if (user) {
+      const existingToken = await this.prismaService.resetToken.findFirst({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      if (existingToken) {
+        if (existingToken.expiryDate > new Date()) {
+          // Token is still valid; don't create a new one
+          return { message: 'Reset token has already been sent!' };
+        } else {
+          // Token is expired; delete it
+          await this.prismaService.resetToken.delete({
+            where: {
+              id: existingToken.id,
+            },
+          });
+        }
+      }
+
       const expiryDate = new Date();
       expiryDate.setHours(expiryDate.getHours() + 1);
 
@@ -207,9 +227,10 @@ export class AuthService {
           expiryDate,
         },
       });
+
+      // Send the reset email
       this.mailerService.sendResetPasswordEmail(email, resetToken);
     }
-
     return {
       message:
         'If this user exists, they will receive an reset password link in their email.',

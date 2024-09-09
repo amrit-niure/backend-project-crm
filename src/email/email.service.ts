@@ -9,7 +9,7 @@ export class EmailService {
     try {
       const context = {
         name: 'Amrit Niure',
-        resetLink: `https://amritniure.com.np?token=${token}`, // Replace with frontend URL
+        resetLink: `http://localhost:3001/auth/reset-password?token=${token}`, // Replace with frontend URL
       };
       await this.mailerService.sendMail({
         to: to,
