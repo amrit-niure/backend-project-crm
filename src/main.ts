@@ -7,8 +7,9 @@ import { ConfigService } from '@nestjs/config';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
-  const PORT = configService.get<number>('PORT') || 3001;
-  const NODE_ENV = configService.get<number>('NODE_ENV') || 'development';
+  const PORT = configService.get<number>('port') || 8080;
+  const FRONTEND_URL = configService.get<string>('frontend_url');
+  const NODE_ENV = configService.get<number>('node_env') || 'development';
 
   const config = new DocumentBuilder()
     .setTitle('CRM-API')
@@ -32,7 +33,7 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: ['http://localhost:3001'],
+    origin: [`${FRONTEND_URL}`],
     credentials: true, // Allow credentials like cookies to be sent
   });
   // app.useGlobalFilters(new AllExceptionsFilter());

@@ -7,8 +7,8 @@ import { AuthService } from '../auth.service';
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     super({
-      usernameField: 'username', // local strategy expects username, and password feild, so if your schema doesnot have username property you have to map it with the similar feild in your schema. for example email in this case.
-      // usernameField: 'email',
+      // usernameField: 'username', // local strategy expects username, and password feild, so if your schema doesnot have username property you have to map it with the similar feild in your schema. for example email in this case.
+      usernameField: 'email',
     });
   }
   async validate(email: string, password: string) {
