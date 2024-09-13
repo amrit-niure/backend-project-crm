@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EmailService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async sendResetPasswordEmail(to: string, token: string): Promise<void> {
     try {
       const context = {
         name: 'Amrit Niure',
-        resetLink: `http://localhost:3001/auth/reset-password?token=${token}`, // Replace with frontend URL
+        resetLink: `${this.configService.get<string>('frontend_url')}/auth/reset-password?token=${token}`,
       };
       await this.mailerService.sendMail({
         to: to,
@@ -20,7 +24,7 @@ export class EmailService {
       console.log(`Reset password email sent to ${to}`);
     } catch (error) {
       console.error('Error sending reset password email:', error);
-      throw error; // Rethrow or handle the error as needed
+      throw error;
     }
   }
 
